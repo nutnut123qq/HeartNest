@@ -1,0 +1,11 @@
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\bin\Debug\net8.0\CareNest.Domain.deps.json
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\bin\Debug\net8.0\CareNest.Domain.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\bin\Debug\net8.0\CareNest.Domain.pdb
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.AssemblyInfoInputs.cache
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.AssemblyInfo.cs
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.csproj.CoreCompileInputs.cache
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\refint\CareNest.Domain.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.pdb
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\ref\CareNest.Domain.dll
