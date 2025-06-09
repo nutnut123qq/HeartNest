@@ -16,9 +16,9 @@ public class User : BaseEntity
     public DateTime? LastLoginAt { get; set; }
     public bool IsActive { get; set; } = true;
 
-    // Navigation properties for future features
-    // public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-    // public virtual ICollection<Medication> Medications { get; set; } = new List<Medication>();
+    // Navigation properties
+    public ICollection<Reminder> CreatedReminders { get; set; } = new List<Reminder>();
+    public ICollection<Reminder> AssignedReminders { get; set; } = new List<Reminder>();
 
     public string FullName => $"{FirstName} {LastName}".Trim();
 }
