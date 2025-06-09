@@ -18,15 +18,16 @@ obj/
 Migrations/
 
 # Frontend
-node_modules/
-.next/
-out/
-dist/
-*.tsbuildinfo
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+**/*.tsbuildinfo
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/next-env.d.ts
 
 # IDE
 .idea/
