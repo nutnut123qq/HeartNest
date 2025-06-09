@@ -30,26 +30,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="flex h-screen bg-secondary-50 overflow-hidden">
       {/* Sidebar */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
+      <Sidebar
+        isOpen={sidebarOpen}
         onClose={handleSidebarClose}
       />
 
       {/* Main content area */}
-      <div className="lg:pl-80">
+      <div className="flex-1 flex flex-col lg:ml-80">
         {/* Header */}
         <Header onMenuClick={handleSidebarToggle} />
 
         {/* Page content */}
-        <main className={cn('min-h-[calc(100vh-4rem)]', className)}>
+        <main className={cn('flex-1 overflow-y-auto', className)}>
           {showContainer ? (
-            <Container size={containerSize} className="py-6">
+            <Container size={containerSize} className="p-6">
               {children}
             </Container>
           ) : (
-            <div className="py-6">
+            <div className="p-6">
               {children}
             </div>
           )}
