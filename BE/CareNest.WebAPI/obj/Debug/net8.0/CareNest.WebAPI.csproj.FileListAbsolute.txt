@@ -152,3 +152,4 @@ C:\Users\hahuy\Desktop\CareNest\BE\CareNest.WebAPI\obj\Debug\net8.0\refint\CareN
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.WebAPI\obj\Debug\net8.0\CareNest.WebAPI.pdb
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.WebAPI\obj\Debug\net8.0\CareNest.WebAPI.genruntimeconfig.cache
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.WebAPI\obj\Debug\net8.0\ref\CareNest.WebAPI.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.WebAPI\obj\Debug\net8.0\CareNest.WebAPI.sourcelink.json

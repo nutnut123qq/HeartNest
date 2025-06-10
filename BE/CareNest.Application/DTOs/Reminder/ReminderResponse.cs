@@ -51,7 +51,7 @@ public class ReminderResponse
     public int? DurationMinutes { get; set; }
     
     // Custom fields
-    public Dictionary<string, object>? CustomFields { get; set; }
+    public string? CustomFieldsJson { get; set; }
     
     // Timestamps
     public DateTime CreatedAt { get; set; }

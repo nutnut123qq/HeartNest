@@ -11,7 +11,8 @@
   "dependencies": {
     "@googlemaps/react-wrapper": "^1.2.0",
     "@headlessui/react": "^2.2.4",
-    "@hookform/resolvers": "^5.0.1",
+    "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^5.1.0",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -26,7 +27,7 @@
     "recharts": "^2.15.3",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.0",
-    "zod": "^3.25.50",
+    "zod": "^3.25.56",
     "zustand": "^5.0.5"
   },
   "devDependencies": {

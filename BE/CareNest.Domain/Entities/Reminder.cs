@@ -47,8 +47,8 @@ public class Reminder : BaseEntity
     public string? ExerciseType { get; set; }
     public int? DurationMinutes { get; set; }
     
-    // Custom fields for extensibility
-    public Dictionary<string, object>? CustomFields { get; set; }
+    // Custom fields for extensibility (stored as JSON string)
+    public string? CustomFieldsJson { get; set; }
 }
 
 public enum ReminderType

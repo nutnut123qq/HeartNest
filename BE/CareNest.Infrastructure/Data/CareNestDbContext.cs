@@ -79,7 +79,7 @@ public class CareNestDbContext : DbContext
             entity.HasMany(u => u.CreatedReminders)
                 .WithOne(r => r.User)
                 .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasMany(u => u.AssignedReminders)
                 .WithOne(r => r.AssignedToUser)
@@ -154,6 +154,9 @@ public class CareNestDbContext : DbContext
 
             entity.Property(e => e.ExerciseType)
                 .HasMaxLength(100);
+
+            entity.Property(e => e.CustomFieldsJson)
+                .HasMaxLength(4000);
 
             entity.Property(e => e.CreatedAt)
                 .IsRequired();

@@ -1,6 +1,8 @@
 using System.Text;
+using CareNest.Application.Interfaces;
 using CareNest.Application.Services;
 using CareNest.Domain.Interfaces;
+using CareNest.Domain.Services;
 using CareNest.Infrastructure.Data;
 using CareNest.Infrastructure.Repositories;
 using CareNest.Infrastructure.Services;
@@ -20,10 +22,13 @@ builder.Services.AddDbContext<CareNestDbContext>(options =>
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, JwtAuthService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IReminderService, ReminderDomainService>();
+builder.Services.AddScoped<IReminderApplicationService, ReminderApplicationService>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

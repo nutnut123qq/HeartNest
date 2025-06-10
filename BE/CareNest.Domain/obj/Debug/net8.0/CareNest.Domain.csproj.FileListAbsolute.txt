@@ -9,3 +9,4 @@ C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Dom
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\refint\CareNest.Domain.dll
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.pdb
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\ref\CareNest.Domain.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Domain\obj\Debug\net8.0\CareNest.Domain.sourcelink.json

@@ -83,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, className }) 
   const pathname = usePathname()
 
   const NavItem = ({ item }: { item: typeof navigationItems[0] }) => {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+    const isActive = pathname === item.href || (pathname?.startsWith(item.href + '/') ?? false)
     
     return (
       <Link

@@ -1,15 +1,16 @@
 using CareNest.Application.DTOs.Reminder;
+using CareNest.Application.Interfaces;
 using CareNest.Domain.Entities;
 using CareNest.Domain.Interfaces;
 
 namespace CareNest.Application.Services;
 
-public class ReminderService : IReminderService
+public class ReminderApplicationService : IReminderApplicationService
 {
     private readonly IReminderRepository _reminderRepository;
     private readonly IUserRepository _userRepository;
 
-    public ReminderService(IReminderRepository reminderRepository, IUserRepository userRepository)
+    public ReminderApplicationService(IReminderRepository reminderRepository, IUserRepository userRepository)
     {
         _reminderRepository = reminderRepository;
         _userRepository = userRepository;
@@ -116,7 +117,7 @@ public class ReminderService : IReminderService
             ClinicPhone = request.ClinicPhone,
             ExerciseType = request.ExerciseType,
             DurationMinutes = request.DurationMinutes,
-            CustomFields = request.CustomFields,
+            CustomFieldsJson = request.CustomFieldsJson,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -167,7 +168,7 @@ public class ReminderService : IReminderService
         reminder.ClinicPhone = request.ClinicPhone;
         reminder.ExerciseType = request.ExerciseType;
         reminder.DurationMinutes = request.DurationMinutes;
-        reminder.CustomFields = request.CustomFields;
+        reminder.CustomFieldsJson = request.CustomFieldsJson;
 
         var updatedReminder = await _reminderRepository.UpdateAsync(reminder);
         return MapToResponse(updatedReminder);
@@ -276,7 +277,7 @@ public class ReminderService : IReminderService
             ClinicPhone = reminder.ClinicPhone,
             ExerciseType = reminder.ExerciseType,
             DurationMinutes = reminder.DurationMinutes,
-            CustomFields = reminder.CustomFields,
+            CustomFieldsJson = reminder.CustomFieldsJson,
             CreatedAt = reminder.CreatedAt,
             UpdatedAt = reminder.UpdatedAt
         };

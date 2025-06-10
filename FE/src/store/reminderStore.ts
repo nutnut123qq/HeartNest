@@ -1,179 +1,320 @@
-import { create } from 'zustand'
-import { Reminder, CreateReminderData, UpdateReminderData } from '@/types'
-import { api } from '@/lib/api'
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { reminderService } from '@/services/reminderService';
+import type { 
+  ReminderResponse, 
+  CreateReminderRequest, 
+  UpdateReminderRequest, 
+  ReminderStatsResponse,
+  ReminderFilters,
+  ReminderType 
+} from '@/types/reminder';
 
 interface ReminderState {
-  // State
-  reminders: Reminder[]
-  activeReminders: Reminder[]
-  upcomingReminders: Reminder[]
-  isLoading: boolean
-
+  // Data
+  reminders: ReminderResponse[];
+  currentReminder: ReminderResponse | null;
+  stats: ReminderStatsResponse | null;
+  
+  // UI State
+  loading: boolean;
+  error: string | null;
+  filters: ReminderFilters;
+  
   // Actions
-  fetchReminders: () => Promise<void>
-  fetchUpcomingReminders: () => Promise<void>
-  createReminder: (data: CreateReminderData) => Promise<void>
-  updateReminder: (id: string, data: UpdateReminderData) => Promise<void>
-  deleteReminder: (id: string) => Promise<void>
-  markAsCompleted: (id: string) => Promise<void>
-  markAsMissed: (id: string) => Promise<void>
-  setReminders: (reminders: Reminder[]) => void
-  addReminder: (reminder: Reminder) => void
-  updateReminderInStore: (id: string, updates: Partial<Reminder>) => void
-  removeReminderFromStore: (id: string) => void
+  fetchReminders: () => Promise<void>;
+  fetchReminderById: (id: string) => Promise<void>;
+  fetchUpcomingReminders: (hours?: number) => Promise<void>;
+  fetchOverdueReminders: () => Promise<void>;
+  fetchTodayReminders: () => Promise<void>;
+  fetchActiveReminders: () => Promise<void>;
+  fetchCompletedReminders: () => Promise<void>;
+  fetchRemindersByType: (type: ReminderType) => Promise<void>;
+  searchReminders: (searchTerm: string) => Promise<void>;
+  fetchStats: () => Promise<void>;
+  
+  createReminder: (data: CreateReminderRequest) => Promise<ReminderResponse>;
+  updateReminder: (id: string, data: UpdateReminderRequest) => Promise<ReminderResponse>;
+  deleteReminder: (id: string) => Promise<void>;
+  markAsCompleted: (id: string) => Promise<void>;
+  markAsIncomplete: (id: string) => Promise<void>;
+  
+  // Utility actions
+  setFilters: (filters: Partial<ReminderFilters>) => void;
+  clearFilters: () => void;
+  clearError: () => void;
+  setCurrentReminder: (reminder: ReminderResponse | null) => void;
 }
 
-export const useReminderStore = create<ReminderState>((set, get) => ({
-  // Initial state
-  reminders: [],
-  activeReminders: [],
-  upcomingReminders: [],
-  isLoading: false,
+export const useReminderStore = create<ReminderState>()(
+  devtools(
+    (set, get) => ({
+      // Initial state
+      reminders: [],
+      currentReminder: null,
+      stats: null,
+      loading: false,
+      error: null,
+      filters: {},
 
-  // Actions
-  fetchReminders: async () => {
-    set({ isLoading: true })
-    try {
-      const response = await api.get<Reminder[]>('/api/reminders')
-      const reminders = response.data
-      
-      set({
-        reminders,
-        activeReminders: reminders.filter((r) => r.status === 'active'),
-        isLoading: false,
-      })
-    } catch (error) {
-      set({ isLoading: false })
-      throw error
+      // Fetch all reminders
+      fetchReminders: async () => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getReminders();
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch reminder by ID
+      fetchReminderById: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const reminder = await reminderService.getReminderById(id);
+          set({ currentReminder: reminder, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch reminder',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch upcoming reminders
+      fetchUpcomingReminders: async (hours = 24) => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getUpcomingReminders(hours);
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch upcoming reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch overdue reminders
+      fetchOverdueReminders: async () => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getOverdueReminders();
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch overdue reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch today's reminders
+      fetchTodayReminders: async () => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getTodayReminders();
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch today reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch active reminders
+      fetchActiveReminders: async () => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getActiveReminders();
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch active reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch completed reminders
+      fetchCompletedReminders: async () => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getCompletedReminders();
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch completed reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch reminders by type
+      fetchRemindersByType: async (type: ReminderType) => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.getRemindersByType(type);
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch reminders by type',
+            loading: false 
+          });
+        }
+      },
+
+      // Search reminders
+      searchReminders: async (searchTerm: string) => {
+        set({ loading: true, error: null });
+        try {
+          const reminders = await reminderService.searchReminders(searchTerm);
+          set({ reminders, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to search reminders',
+            loading: false 
+          });
+        }
+      },
+
+      // Fetch stats
+      fetchStats: async () => {
+        set({ loading: true, error: null });
+        try {
+          const stats = await reminderService.getReminderStats();
+          set({ stats, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to fetch stats',
+            loading: false 
+          });
+        }
+      },
+
+      // Create reminder
+      createReminder: async (data: CreateReminderRequest) => {
+        set({ loading: true, error: null });
+        try {
+          const newReminder = await reminderService.createReminder(data);
+          const { reminders } = get();
+          set({ 
+            reminders: [newReminder, ...reminders],
+            loading: false 
+          });
+          return newReminder;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to create reminder',
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      // Update reminder
+      updateReminder: async (id: string, data: UpdateReminderRequest) => {
+        set({ loading: true, error: null });
+        try {
+          const updatedReminder = await reminderService.updateReminder(id, data);
+          const { reminders } = get();
+          set({ 
+            reminders: reminders.map(r => r.id === id ? updatedReminder : r),
+            currentReminder: updatedReminder,
+            loading: false 
+          });
+          return updatedReminder;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to update reminder',
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      // Delete reminder
+      deleteReminder: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          await reminderService.deleteReminder(id);
+          const { reminders } = get();
+          set({ 
+            reminders: reminders.filter(r => r.id !== id),
+            loading: false 
+          });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to delete reminder',
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      // Mark as completed
+      markAsCompleted: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const updatedReminder = await reminderService.markAsCompleted(id);
+          const { reminders } = get();
+          set({ 
+            reminders: reminders.map(r => r.id === id ? updatedReminder : r),
+            loading: false 
+          });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to mark as completed',
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      // Mark as incomplete
+      markAsIncomplete: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const updatedReminder = await reminderService.markAsIncomplete(id);
+          const { reminders } = get();
+          set({ 
+            reminders: reminders.map(r => r.id === id ? updatedReminder : r),
+            loading: false 
+          });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to mark as incomplete',
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      // Utility actions
+      setFilters: (newFilters: Partial<ReminderFilters>) => {
+        const { filters } = get();
+        set({ filters: { ...filters, ...newFilters } });
+      },
+
+      clearFilters: () => {
+        set({ filters: {} });
+      },
+
+      clearError: () => {
+        set({ error: null });
+      },
+
+      setCurrentReminder: (reminder: ReminderResponse | null) => {
+        set({ currentReminder: reminder });
+      }
+    }),
+    {
+      name: 'reminder-store'
     }
-  },
-
-  fetchUpcomingReminders: async () => {
-    try {
-      const response = await api.get<Reminder[]>('/api/reminders/upcoming')
-      set({ upcomingReminders: response.data })
-    } catch (error) {
-      console.error('Failed to fetch upcoming reminders:', error)
-    }
-  },
-
-  createReminder: async (data: CreateReminderData) => {
-    set({ isLoading: true })
-    try {
-      const response = await api.post<Reminder>('/api/reminders', data)
-      const newReminder = response.data
-      
-      set((state) => ({
-        reminders: [...state.reminders, newReminder],
-        activeReminders: newReminder.status === 'active' 
-          ? [...state.activeReminders, newReminder]
-          : state.activeReminders,
-        isLoading: false,
-      }))
-    } catch (error) {
-      set({ isLoading: false })
-      throw error
-    }
-  },
-
-  updateReminder: async (id: string, data: UpdateReminderData) => {
-    set({ isLoading: true })
-    try {
-      const response = await api.put<Reminder>(`/api/reminders/${id}`, data)
-      const updatedReminder = response.data
-      
-      set((state) => ({
-        reminders: state.reminders.map((r) => r.id === id ? updatedReminder : r),
-        activeReminders: state.activeReminders.map((r) => 
-          r.id === id ? updatedReminder : r
-        ).filter((r) => r.status === 'active'),
-        isLoading: false,
-      }))
-    } catch (error) {
-      set({ isLoading: false })
-      throw error
-    }
-  },
-
-  deleteReminder: async (id: string) => {
-    set({ isLoading: true })
-    try {
-      await api.delete(`/api/reminders/${id}`)
-      
-      set((state) => ({
-        reminders: state.reminders.filter((r) => r.id !== id),
-        activeReminders: state.activeReminders.filter((r) => r.id !== id),
-        upcomingReminders: state.upcomingReminders.filter((r) => r.id !== id),
-        isLoading: false,
-      }))
-    } catch (error) {
-      set({ isLoading: false })
-      throw error
-    }
-  },
-
-  markAsCompleted: async (id: string) => {
-    try {
-      const response = await api.post<Reminder>(`/api/reminders/${id}/complete`)
-      const updatedReminder = response.data
-      
-      set((state) => ({
-        reminders: state.reminders.map((r) => r.id === id ? updatedReminder : r),
-        activeReminders: state.activeReminders.filter((r) => r.id !== id),
-        upcomingReminders: state.upcomingReminders.filter((r) => r.id !== id),
-      }))
-    } catch (error) {
-      throw error
-    }
-  },
-
-  markAsMissed: async (id: string) => {
-    try {
-      const response = await api.put<Reminder>(`/api/reminders/${id}`, { status: 'missed' })
-      const updatedReminder = response.data
-      
-      set((state) => ({
-        reminders: state.reminders.map((r) => r.id === id ? updatedReminder : r),
-        activeReminders: state.activeReminders.filter((r) => r.id !== id),
-        upcomingReminders: state.upcomingReminders.filter((r) => r.id !== id),
-      }))
-    } catch (error) {
-      throw error
-    }
-  },
-
-  setReminders: (reminders: Reminder[]) => {
-    set({
-      reminders,
-      activeReminders: reminders.filter((r) => r.status === 'active'),
-    })
-  },
-
-  addReminder: (reminder: Reminder) => {
-    set((state) => ({
-      reminders: [...state.reminders, reminder],
-      activeReminders: reminder.status === 'active' 
-        ? [...state.activeReminders, reminder]
-        : state.activeReminders,
-    }))
-  },
-
-  updateReminderInStore: (id: string, updates: Partial<Reminder>) => {
-    set((state) => ({
-      reminders: state.reminders.map((r) => 
-        r.id === id ? { ...r, ...updates } : r
-      ),
-      activeReminders: state.activeReminders.map((r) => 
-        r.id === id ? { ...r, ...updates } : r
-      ).filter((r) => r.status === 'active'),
-    }))
-  },
-
-  removeReminderFromStore: (id: string) => {
-    set((state) => ({
-      reminders: state.reminders.filter((r) => r.id !== id),
-      activeReminders: state.activeReminders.filter((r) => r.id !== id),
-      upcomingReminders: state.upcomingReminders.filter((r) => r.id !== id),
-    }))
-  },
-}))
+  )
+);

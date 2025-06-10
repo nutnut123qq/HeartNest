@@ -17,3 +17,4 @@ C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Infrastructure\obj\Debug\net8.0\refi
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Infrastructure\obj\Debug\net8.0\CareNest.Infrastructure.pdb
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Infrastructure\obj\Debug\net8.0\CareNest.Infrastructure.genruntimeconfig.cache
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Infrastructure\obj\Debug\net8.0\ref\CareNest.Infrastructure.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Infrastructure\obj\Debug\net8.0\CareNest.Infrastructure.sourcelink.json

@@ -13,3 +13,4 @@ C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Application\obj\Debug\net8.0\CareNes
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Application\obj\Debug\net8.0\refint\CareNest.Application.dll
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Application\obj\Debug\net8.0\CareNest.Application.pdb
 C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Application\obj\Debug\net8.0\ref\CareNest.Application.dll
+C:\Users\hahuy\Desktop\CareNest\BE\CareNest.Application\obj\Debug\net8.0\CareNest.Application.sourcelink.json
