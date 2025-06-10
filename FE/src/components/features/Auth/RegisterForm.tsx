@@ -9,7 +9,11 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Layout'
 import { useAuthStore } from '@/store/authStore'
+import type { User } from '@/types'
 import { toast } from 'react-hot-toast'
+
+// Type alias to ensure compatibility
+type UserType = User
 
 const registerSchema = z.object({
   firstName: z
@@ -54,17 +58,17 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>
 
 interface RegisterFormProps {
-  onSuccess?: () => void
+  onSuccess?: (user: UserType) => void
   onSwitchToLogin?: () => void
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ 
-  onSuccess, 
-  onSwitchToLogin 
+export const RegisterForm: React.FC<RegisterFormProps> = ({
+  onSuccess,
+  onSwitchToLogin
 }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const { register: registerUser } = useAuthStore()
+  const { register: registerUser, user } = useAuthStore()
 
   const {
     register,
@@ -87,7 +91,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       console.log('API data JSON:', JSON.stringify(apiData, null, 2))
       await registerUser(apiData)
       toast.success('Đăng ký thành công!')
-      onSuccess?.()
+
+      // Wait a bit for user to be set in store, then call onSuccess with user data
+      setTimeout(() => {
+        if (user) {
+          onSuccess?.(user)
+        }
+      }, 100)
     } catch (error: any) {
       console.error('Register error:', error)
       console.error('Error response:', error.response)

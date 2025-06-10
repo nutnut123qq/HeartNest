@@ -1,3 +1,5 @@
+using CareNest.Domain.Enums;
+
 namespace CareNest.Application.DTOs.Auth;
 
 public class AuthResponse
@@ -17,6 +19,7 @@ public class UserDto
     public string? PhoneNumber { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? Gender { get; set; }
+    public UserRole Role { get; set; }
     public bool IsEmailVerified { get; set; }
     public DateTime CreatedAt { get; set; }
 }

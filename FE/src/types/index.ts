@@ -1,17 +1,25 @@
 // Core Types for CareNest Frontend Application
 
 // ===== USER & AUTHENTICATION =====
+export enum UserRole {
+  User = 0,
+  Nurse = 1,
+  Admin = 2
+}
+
 export interface User {
   id: string
   email: string
   firstName: string
   lastName: string
+  fullName: string
+  role: UserRole
   avatar?: string
-  phone?: string
+  phoneNumber?: string
   dateOfBirth?: string
-  gender?: 'male' | 'female' | 'other'
+  gender?: string
+  isEmailVerified: boolean
   createdAt: string
-  updatedAt: string
 }
 
 export interface LoginCredentials {

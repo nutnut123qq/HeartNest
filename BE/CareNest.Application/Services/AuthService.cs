@@ -84,6 +84,7 @@ public class AuthService
                 PhoneNumber = request.PhoneNumber,
                 DateOfBirth = request.DateOfBirth,
                 Gender = request.Gender,
+                Role = Domain.Enums.UserRole.User, // Default role
                 IsEmailVerified = false,
                 IsActive = true
             };
@@ -110,6 +111,68 @@ public class AuthService
         }
     }
 
+    public async Task<ApiResponse<string>> CreateAdminUserAsync()
+    {
+        try
+        {
+            var adminEmail = new Email("admin@carenest.com");
+
+            if (await _userRepository.ExistsByEmailAsync(adminEmail))
+            {
+                return ApiResponse<string>.ErrorResult("Admin user already exists");
+            }
+
+            var adminUser = new User
+            {
+                FirstName = "Admin",
+                LastName = "CareNest",
+                Email = adminEmail,
+                PasswordHash = _authDomainService.HashPassword("admin123"),
+                Role = Domain.Enums.UserRole.Admin,
+                IsEmailVerified = true,
+                IsActive = true
+            };
+
+            await _userRepository.CreateAsync(adminUser);
+            return ApiResponse<string>.SuccessResult("Admin user created successfully", "Admin user created");
+        }
+        catch (Exception)
+        {
+            return ApiResponse<string>.ErrorResult("Error creating admin user");
+        }
+    }
+
+    public async Task<ApiResponse<string>> CreateNurseUserAsync()
+    {
+        try
+        {
+            var nurseEmail = new Email("nurse@carenest.com");
+
+            if (await _userRepository.ExistsByEmailAsync(nurseEmail))
+            {
+                return ApiResponse<string>.ErrorResult("Nurse user already exists");
+            }
+
+            var nurseUser = new User
+            {
+                FirstName = "Nurse",
+                LastName = "Test",
+                Email = nurseEmail,
+                PasswordHash = _authDomainService.HashPassword("nurse123"),
+                Role = Domain.Enums.UserRole.Nurse,
+                IsEmailVerified = true,
+                IsActive = true
+            };
+
+            await _userRepository.CreateAsync(nurseUser);
+            return ApiResponse<string>.SuccessResult("Nurse user created successfully", "Nurse user created");
+        }
+        catch (Exception)
+        {
+            return ApiResponse<string>.ErrorResult("Error creating nurse user");
+        }
+    }
+
     private static UserDto MapToUserDto(User user)
     {
         return new UserDto
@@ -122,6 +185,7 @@ public class AuthService
             PhoneNumber = user.PhoneNumber,
             DateOfBirth = user.DateOfBirth,
             Gender = user.Gender,
+            Role = user.Role,
             IsEmailVerified = user.IsEmailVerified,
             CreatedAt = user.CreatedAt
         };

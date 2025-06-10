@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Layout'
 import { useAuthStore } from '@/store/authStore'
+import type { User } from '@/types'
 import { toast } from 'react-hot-toast'
 
 const loginSchema = z.object({
@@ -24,16 +25,16 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 interface LoginFormProps {
-  onSuccess?: () => void
+  onSuccess?: (user: User) => void
   onSwitchToRegister?: () => void
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ 
-  onSuccess, 
-  onSwitchToRegister 
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onSuccess,
+  onSwitchToRegister
 }) => {
   const [showPassword, setShowPassword] = useState(false)
-  const { login } = useAuthStore()
+  const { login, user } = useAuthStore()
 
   const {
     register,
@@ -48,7 +49,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       console.log('Login data being sent:', data)
       await login(data)
       toast.success('Đăng nhập thành công!')
-      onSuccess?.()
+
+      // Wait a bit for user to be set in store, then call onSuccess with user data
+      setTimeout(() => {
+        if (user) {
+          onSuccess?.(user)
+        }
+      }, 100)
     } catch (error: any) {
       console.error('Login error:', error)
       console.error('Error response:', error.response?.data)

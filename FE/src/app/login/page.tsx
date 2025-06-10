@@ -5,13 +5,18 @@ import { useRouter } from 'next/navigation'
 import { LoginForm } from '@/components/features/Auth/LoginForm'
 import { RegisterForm } from '@/components/features/Auth/RegisterForm'
 import { Container } from '@/components/ui/Layout'
+import { useAuthStore } from '@/store/authStore'
+import type { UserRole, User } from '@/types'
+import { getDashboardRoute } from '@/lib/roleUtils'
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
   const router = useRouter()
 
-  const handleAuthSuccess = () => {
-    router.push('/dashboard')
+  const handleAuthSuccess = (loggedInUser: User) => {
+    // Redirect based on user role
+    const dashboardRoute = getDashboardRoute(loggedInUser.role)
+    router.push(dashboardRoute)
   }
 
   const handleSwitchMode = () => {

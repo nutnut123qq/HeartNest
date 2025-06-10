@@ -53,6 +53,10 @@ public class CareNestDbContext : DbContext
             entity.Property(e => e.Gender)
                 .HasMaxLength(10);
 
+            entity.Property(e => e.Role)
+                .IsRequired()
+                .HasDefaultValue(Domain.Enums.UserRole.User);
+
             entity.Property(e => e.CreatedAt)
                 .IsRequired();
 

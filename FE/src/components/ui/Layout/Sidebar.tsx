@@ -3,21 +3,25 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  Home, 
-  Bell, 
-  Users, 
-  MapPin, 
-  MessageCircle, 
-  CreditCard, 
+import {
+  Home,
+  Bell,
+  Users,
+  MapPin,
+  MessageCircle,
+  CreditCard,
   Settings,
   X,
   Heart,
   Calendar,
-  Stethoscope
+  Stethoscope,
+  Shield,
+  Activity
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/store/authStore'
+import { UserRole } from '@/types'
 
 interface SidebarProps {
   isOpen: boolean
@@ -25,50 +29,99 @@ interface SidebarProps {
   className?: string
 }
 
-const navigationItems = [
-  {
-    name: 'Trang chủ',
-    href: '/dashboard',
-    icon: Home,
-    description: 'Tổng quan và thống kê'
-  },
-  {
-    name: 'Nhắc nhở',
-    href: '/reminders',
-    icon: Bell,
-    description: 'Quản lý nhắc nhở thuốc và lịch khám'
-  },
-  {
-    name: 'Gia đình',
-    href: '/family',
-    icon: Users,
-    description: 'Quản lý thành viên gia đình'
-  },
-  {
-    name: 'Dịch vụ y tế',
-    href: '/healthcare',
-    icon: Stethoscope,
-    description: 'Tìm kiếm cơ sở y tế và bác sĩ'
-  },
-  {
-    name: 'Bản đồ y tế',
-    href: '/healthcare/map',
-    icon: MapPin,
-    description: 'Bản đồ cơ sở y tế gần bạn'
-  },
-  {
-    name: 'Tư vấn',
-    href: '/chat',
-    icon: MessageCircle,
-    description: 'Chat với bác sĩ và chuyên gia'
-  },
-  {
-    name: 'Gói dịch vụ',
-    href: '/subscription',
-    icon: CreditCard,
-    description: 'Quản lý gói dịch vụ và thanh toán'
-  },
-]
+const getNavigationItems = (userRole: UserRole) => {
+  const baseItems = [
+    {
+      name: 'Trang chủ',
+      href: '/dashboard',
+      icon: Home,
+      description: 'Tổng quan và thống kê',
+      roles: [UserRole.User, UserRole.Nurse, UserRole.Admin]
+    },
+    {
+      name: 'Nhắc nhở',
+      href: '/reminders',
+      icon: Bell,
+      description: 'Quản lý nhắc nhở thuốc và lịch khám',
+      roles: [UserRole.User, UserRole.Nurse, UserRole.Admin]
+    },
+  ]
+
+  const userItems = [
+    {
+      name: 'Gia đình',
+      href: '/family',
+      icon: Users,
+      description: 'Quản lý thành viên gia đình',
+      roles: [UserRole.User]
+    },
+    {
+      name: 'Dịch vụ y tế',
+      href: '/healthcare',
+      icon: Stethoscope,
+      description: 'Tìm kiếm cơ sở y tế và bác sĩ',
+      roles: [UserRole.User]
+    },
+    {
+      name: 'Bản đồ y tế',
+      href: '/healthcare/map',
+      icon: MapPin,
+      description: 'Bản đồ cơ sở y tế gần bạn',
+      roles: [UserRole.User]
+    },
+    {
+      name: 'Tư vấn',
+      href: '/chat',
+      icon: MessageCircle,
+      description: 'Chat với bác sĩ và chuyên gia',
+      roles: [UserRole.User]
+    },
+    {
+      name: 'Gói dịch vụ',
+      href: '/subscription',
+      icon: CreditCard,
+      description: 'Quản lý gói dịch vụ và thanh toán',
+      roles: [UserRole.User]
+    },
+  ]
+
+  const nurseItems = [
+    {
+      name: 'Dashboard Điều dưỡng',
+      href: '/nurse/dashboard',
+      icon: Activity,
+      description: 'Dashboard cho điều dưỡng',
+      roles: [UserRole.Nurse]
+    },
+    {
+      name: 'Bệnh nhân',
+      href: '/nurse/patients',
+      icon: Users,
+      description: 'Quản lý bệnh nhân được phân công',
+      roles: [UserRole.Nurse]
+    },
+  ]
+
+  const adminItems = [
+    {
+      name: 'Dashboard Admin',
+      href: '/admin/dashboard',
+      icon: Shield,
+      description: 'Dashboard quản trị hệ thống',
+      roles: [UserRole.Admin]
+    },
+    {
+      name: 'Quản lý người dùng',
+      href: '/admin/users',
+      icon: Users,
+      description: 'Quản lý tất cả người dùng',
+      roles: [UserRole.Admin]
+    },
+  ]
+
+  const allItems = [...baseItems, ...userItems, ...nurseItems, ...adminItems]
+  return allItems.filter(item => item.roles.includes(userRole))
+}
 
 const settingsItems = [
   {
@@ -81,6 +134,9 @@ const settingsItems = [
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, className }) => {
   const pathname = usePathname()
+  const { user } = useAuthStore()
+
+  const navigationItems = getNavigationItems(user?.role || UserRole.User)
 
   const NavItem = ({ item }: { item: typeof navigationItems[0] }) => {
     const isActive = pathname === item.href || (pathname?.startsWith(item.href + '/') ?? false)

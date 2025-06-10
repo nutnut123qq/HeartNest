@@ -1,0 +1,2 @@
+# This file keeps the pages directory in git
+# The pages directory is needed by Next.js even when using app router

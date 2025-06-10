@@ -21,4 +21,9 @@ public interface IReminderRepository
     Task<int> GetCountByUserAsync(Guid userId);
     Task<int> GetCompletedCountByUserAsync(Guid userId);
     Task<IEnumerable<Reminder>> SearchAsync(Guid userId, string searchTerm);
+
+    // Admin/Nurse methods
+    Task<int> GetTotalRemindersAsync();
+    Task<int> GetActiveRemindersCountAsync();
+    Task<IEnumerable<Reminder>> GetRemindersByAssignedUserAsync(Guid assignedUserId);
 }

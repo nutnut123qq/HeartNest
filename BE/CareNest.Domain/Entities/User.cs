@@ -1,4 +1,5 @@
 using CareNest.Domain.Common;
+using CareNest.Domain.Enums;
 using CareNest.Domain.ValueObjects;
 
 namespace CareNest.Domain.Entities;
@@ -12,6 +13,7 @@ public class User : BaseEntity
     public string? PhoneNumber { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? Gender { get; set; }
+    public UserRole Role { get; set; } = UserRole.User;
     public bool IsEmailVerified { get; set; } = false;
     public DateTime? LastLoginAt { get; set; }
     public bool IsActive { get; set; } = true;

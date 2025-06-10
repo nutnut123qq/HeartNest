@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { User, LoginCredentials, RegisterData, AuthResponse } from '@/types'
+import { User, LoginCredentials, RegisterData, AuthResponse, UserRole } from '@/types'
 import { api } from '@/lib/api'
 
 interface AuthState {
@@ -14,12 +14,18 @@ interface AuthState {
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>
   register: (data: RegisterData) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
   refreshAccessToken: () => Promise<string>
   updateProfile: (data: Partial<User>) => Promise<void>
   setUser: (user: User) => void
   setTokens: (accessToken: string, refreshToken: string) => void
   clearAuth: () => void
+
+  // Role helpers
+  isAdmin: () => boolean
+  isNurse: () => boolean
+  isUser: () => boolean
+  hasRole: (role: UserRole) => boolean
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -45,11 +51,13 @@ export const useAuthStore = create<AuthState>()(
               email: user.email,
               firstName: user.firstName,
               lastName: user.lastName,
-              phone: user.phoneNumber,
+              fullName: user.fullName,
+              role: user.role,
+              phoneNumber: user.phoneNumber,
               dateOfBirth: user.dateOfBirth,
               gender: user.gender,
+              isEmailVerified: user.isEmailVerified,
               createdAt: user.createdAt,
-              updatedAt: user.createdAt,
             },
             isAuthenticated: true,
             accessToken: token,
@@ -74,11 +82,13 @@ export const useAuthStore = create<AuthState>()(
               email: user.email,
               firstName: user.firstName,
               lastName: user.lastName,
-              phone: user.phoneNumber,
+              fullName: user.fullName,
+              role: user.role,
+              phoneNumber: user.phoneNumber,
               dateOfBirth: user.dateOfBirth,
               gender: user.gender,
+              isEmailVerified: user.isEmailVerified,
               createdAt: user.createdAt,
-              updatedAt: user.createdAt,
             },
             isAuthenticated: true,
             accessToken: token,
@@ -91,10 +101,16 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        // Call logout API
-        api.post('/api/auth/logout').catch(console.error)
-        
+      logout: async () => {
+        try {
+          // Call logout API if available
+          await api.post('/api/auth/logout')
+        } catch (error) {
+          // Ignore API errors for logout - clear local state anyway
+          console.log('Logout API call failed, clearing local state')
+        }
+
+        // Always clear local state
         set({
           user: null,
           isAuthenticated: false,
@@ -155,6 +171,27 @@ export const useAuthStore = create<AuthState>()(
           accessToken: null,
           refreshToken: null,
         })
+      },
+
+      // Role helpers
+      isAdmin: () => {
+        const { user } = get()
+        return user?.role === UserRole.Admin
+      },
+
+      isNurse: () => {
+        const { user } = get()
+        return user?.role === UserRole.Nurse
+      },
+
+      isUser: () => {
+        const { user } = get()
+        return user?.role === UserRole.User
+      },
+
+      hasRole: (role: UserRole) => {
+        const { user } = get()
+        return user?.role === role
       },
     }),
     {

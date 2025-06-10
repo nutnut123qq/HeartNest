@@ -5,6 +5,7 @@ import { Menu, X, Bell, User, LogOut, Settings, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
 import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -15,10 +16,20 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const { user, logout } = useAuthStore()
+  const router = useRouter()
 
-  const handleLogout = () => {
-    logout()
-    setShowUserMenu(false)
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setShowUserMenu(false)
+      // Redirect to login page after logout
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Still close menu and redirect even if logout fails
+      setShowUserMenu(false)
+      router.push('/login')
+    }
   }
 
   return (

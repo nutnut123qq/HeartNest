@@ -70,4 +70,47 @@ public class AuthController : ControllerBase
 
         return BadRequest(result);
     }
+
+    /// <summary>
+    /// Đăng xuất người dùng
+    /// </summary>
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        // Since we're using stateless JWT, logout is handled on client side
+        // This endpoint exists for consistency and future token blacklisting if needed
+        return Ok(new { success = true, message = "Đăng xuất thành công" });
+    }
+
+    /// <summary>
+    /// Create admin user for testing (Development only)
+    /// </summary>
+    [HttpPost("create-admin")]
+    public async Task<IActionResult> CreateAdmin()
+    {
+        var result = await _authService.CreateAdminUserAsync();
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    /// <summary>
+    /// Create nurse user for testing (Development only)
+    /// </summary>
+    [HttpPost("create-nurse")]
+    public async Task<IActionResult> CreateNurse()
+    {
+        var result = await _authService.CreateNurseUserAsync();
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
 }

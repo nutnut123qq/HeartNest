@@ -46,6 +46,7 @@ public class JwtAuthService : IAuthService
             new Claim(ClaimTypes.Name, user.FullName),
             new Claim(ClaimTypes.GivenName, user.FirstName),
             new Claim(ClaimTypes.Surname, user.LastName),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim("email_verified", user.IsEmailVerified.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)

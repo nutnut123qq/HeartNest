@@ -194,4 +194,23 @@ public class ReminderRepository : IReminderRepository
             .OrderBy(r => r.ScheduledAt)
             .ToListAsync();
     }
+
+    public async Task<int> GetTotalRemindersAsync()
+    {
+        return await _context.Reminders.CountAsync();
+    }
+
+    public async Task<int> GetActiveRemindersCountAsync()
+    {
+        return await _context.Reminders.CountAsync(r => r.IsActive);
+    }
+
+    public async Task<IEnumerable<Reminder>> GetRemindersByAssignedUserAsync(Guid assignedUserId)
+    {
+        return await _context.Reminders
+            .Include(r => r.User)
+            .Where(r => r.AssignedToUserId == assignedUserId)
+            .OrderBy(r => r.ScheduledAt)
+            .ToListAsync();
+    }
 }

@@ -1,4 +1,5 @@
 using CareNest.Domain.Entities;
+using CareNest.Domain.Enums;
 using CareNest.Domain.ValueObjects;
 
 namespace CareNest.Domain.Interfaces;
@@ -12,4 +13,10 @@ public interface IUserRepository
     Task<User> UpdateAsync(User user);
     Task DeleteAsync(Guid id);
     Task<IEnumerable<User>> GetAllAsync();
+
+    // Role-based methods
+    Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role);
+    Task<int> GetUsersByRoleCountAsync(UserRole role);
+    Task<int> GetTotalUsersAsync();
+    Task<object> GetUsersWithPaginationAsync(int page, int pageSize);
 }
