@@ -13,6 +13,13 @@ public class CareNestDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
 
+    // Healthcare entities
+    public DbSet<HealthcareFacility> HealthcareFacilities { get; set; }
+    public DbSet<HealthcareProvider> HealthcareProviders { get; set; }
+    public DbSet<ProviderFacility> ProviderFacilities { get; set; }
+    public DbSet<FacilityReview> FacilityReviews { get; set; }
+    public DbSet<ProviderReview> ProviderReviews { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -173,6 +180,282 @@ public class CareNestDbContext : DbContext
 
             // Global query filter to exclude soft deleted records
             entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        // Configure HealthcareFacility entity
+        modelBuilder.Entity<HealthcareFacility>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Type)
+                .IsRequired()
+                .HasConversion<string>();
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.Address)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Phone)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.Email)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Website)
+                .HasMaxLength(200);
+
+            entity.Property(e => e.AverageRating)
+                .HasPrecision(3, 2)
+                .HasDefaultValue(0);
+
+            entity.Property(e => e.ReviewCount)
+                .HasDefaultValue(0);
+
+            entity.Property(e => e.OperatingHours)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.Services)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.Images)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.IsVerified)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Indexes
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => new { e.Latitude, e.Longitude });
+            entity.HasIndex(e => e.IsActive);
+        });
+
+        // Configure HealthcareProvider entity
+        modelBuilder.Entity<HealthcareProvider>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.FirstName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.LastName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Title)
+                .HasMaxLength(20);
+
+            entity.Property(e => e.Specialization)
+                .IsRequired()
+                .HasConversion<string>();
+
+            entity.Property(e => e.SubSpecialty)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.LicenseNumber)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.Qualifications)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.Biography)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.Phone)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.Email)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.AverageRating)
+                .HasPrecision(3, 2)
+                .HasDefaultValue(0);
+
+            entity.Property(e => e.ReviewCount)
+                .HasDefaultValue(0);
+
+            entity.Property(e => e.ConsultationFees)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.Availability)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.Languages)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.ProfileImage)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.IsVerified)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.AcceptsNewPatients)
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationships
+            entity.HasOne(e => e.PrimaryFacility)
+                .WithMany(f => f.Providers)
+                .HasForeignKey(e => e.PrimaryFacilityId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Indexes
+            entity.HasIndex(e => e.Specialization);
+            entity.HasIndex(e => e.LicenseNumber).IsUnique();
+            entity.HasIndex(e => e.IsActive);
+        });
+
+        // Configure ProviderFacility junction table
+        modelBuilder.Entity<ProviderFacility>(entity =>
+        {
+            entity.HasKey(e => new { e.ProviderId, e.FacilityId });
+
+            entity.Property(e => e.RoomNumber)
+                .HasMaxLength(20);
+
+            entity.Property(e => e.Department)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.IsPrimary)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.StartDate)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
+            // Relationships
+            entity.HasOne(e => e.Provider)
+                .WithMany(p => p.ProviderFacilities)
+                .HasForeignKey(e => e.ProviderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Facility)
+                .WithMany()
+                .HasForeignKey(e => e.FacilityId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure FacilityReview entity
+        modelBuilder.Entity<FacilityReview>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Rating)
+                .IsRequired();
+
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Comment)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.IsVerified)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.IsAnonymous)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationships
+            entity.HasOne(e => e.Facility)
+                .WithMany(f => f.Reviews)
+                .HasForeignKey(e => e.FacilityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            entity.HasIndex(e => e.FacilityId);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Rating);
+        });
+
+        // Configure ProviderReview entity
+        modelBuilder.Entity<ProviderReview>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Rating)
+                .IsRequired();
+
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Comment)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.TreatmentType)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.WouldRecommend)
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.IsVerified)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.IsAnonymous)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationships
+            entity.HasOne(e => e.Provider)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(e => e.ProviderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            entity.HasIndex(e => e.ProviderId);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Rating);
         });
     }
 

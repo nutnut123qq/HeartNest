@@ -175,66 +175,178 @@ export interface ReminderMetadata {
 export type NotificationChannel = 'web' | 'email' | 'sms' | 'push' | 'zalo'
 
 // ===== HEALTHCARE =====
+export enum HealthcareFacilityType {
+  Hospital = 0,
+  Clinic = 1,
+  Pharmacy = 2,
+  Laboratory = 3,
+  Emergency = 4,
+  SpecialtyCenter = 5
+}
+
+export enum ProviderSpecialization {
+  GeneralPractice = 0,
+  Cardiology = 1,
+  Dermatology = 2,
+  Endocrinology = 3,
+  Gastroenterology = 4,
+  Neurology = 5,
+  Oncology = 6,
+  Orthopedics = 7,
+  Pediatrics = 8,
+  Psychiatry = 9,
+  Radiology = 10,
+  Surgery = 11,
+  Urology = 12,
+  Gynecology = 13,
+  Ophthalmology = 14,
+  ENT = 15,
+  Dentistry = 16,
+  Physiotherapy = 17,
+  Psychology = 18,
+  Nutrition = 19
+}
+
 export interface HealthcareFacility {
   id: string
   name: string
-  type: 'hospital' | 'clinic' | 'pharmacy' | 'laboratory' | 'emergency'
+  type: HealthcareFacilityType
+  typeDisplay: string
+  description: string
   address: string
   phone: string
   email?: string
   website?: string
-  location: {
-    latitude: number
-    longitude: number
-  }
-  rating?: number
-  reviews?: Review[]
+  latitude: number
+  longitude: number
+  averageRating: number
+  reviewCount: number
+  operatingHours: string[]
   services: string[]
-  openingHours: OpeningHours[]
-  distance?: number // in kilometers
+  images: string[]
+  isActive: boolean
+  isVerified: boolean
+  createdAt: string
+  updatedAt: string
+  providers?: HealthcareProviderSummary[]
+  recentReviews?: FacilityReview[]
+  distanceKm?: number
+}
+
+export interface HealthcareFacilitySummary {
+  id: string
+  name: string
+  type: HealthcareFacilityType
+  typeDisplay: string
+  address: string
+  phone: string
+  averageRating: number
+  reviewCount: number
+  isVerified: boolean
+  distanceKm?: number
 }
 
 export interface HealthcareProvider {
   id: string
-  name: string
-  specialization: string
+  firstName: string
+  lastName: string
+  fullName: string
+  title: string
+  specialization: ProviderSpecialization
+  specializationDisplay: string
+  subSpecialty?: string
+  licenseNumber: string
+  yearsOfExperience: number
   qualifications: string[]
-  experience: number
-  rating?: number
-  reviews?: Review[]
-  facilities: HealthcareFacility[]
-  contact: {
-    phone: string
-    email?: string
-  }
-  availability: Availability[]
-}
-
-export interface OpeningHours {
-  dayOfWeek: number // 0-6, Sunday = 0
-  openTime: string // HH:mm format
-  closeTime: string // HH:mm format
-  isClosed: boolean
-}
-
-export interface Availability {
-  dayOfWeek: number
-  timeSlots: TimeSlot[]
-}
-
-export interface TimeSlot {
-  startTime: string
-  endTime: string
-  isAvailable: boolean
-}
-
-export interface Review {
-  id: string
-  userId: string
-  user: User
-  rating: number
-  comment: string
+  biography: string
+  phone: string
+  email?: string
+  averageRating: number
+  reviewCount: number
+  consultationFees: Record<string, number>
+  availability: Record<string, string[]>
+  languages: string[]
+  profileImage?: string
+  isActive: boolean
+  isVerified: boolean
+  acceptsNewPatients: boolean
   createdAt: string
+  updatedAt: string
+  primaryFacility?: HealthcareFacilitySummary
+  facilities?: HealthcareFacilitySummary[]
+  recentReviews?: ProviderReview[]
+}
+
+export interface HealthcareProviderSummary {
+  id: string
+  fullName: string
+  title: string
+  specialization: ProviderSpecialization
+  specializationDisplay: string
+  subSpecialty?: string
+  yearsOfExperience: number
+  averageRating: number
+  reviewCount: number
+  isVerified: boolean
+  acceptsNewPatients: boolean
+  profileImage?: string
+}
+
+export interface FacilityReview {
+  id: string
+  facilityId: string
+  userId: string
+  rating: number
+  title: string
+  comment: string
+  cleanlinessRating?: number
+  staffRating?: number
+  waitTimeRating?: number
+  facilitiesRating?: number
+  isVerified: boolean
+  isAnonymous: boolean
+  createdAt: string
+  updatedAt: string
+  userName?: string
+  userAvatar?: string
+  facilityName?: string
+}
+
+export interface ProviderReview {
+  id: string
+  providerId: string
+  userId: string
+  rating: number
+  title: string
+  comment: string
+  communicationRating?: number
+  professionalismRating?: number
+  treatmentEffectivenessRating?: number
+  waitTimeRating?: number
+  visitDate?: string
+  treatmentType?: string
+  wouldRecommend: boolean
+  isVerified: boolean
+  isAnonymous: boolean
+  createdAt: string
+  updatedAt: string
+  userName?: string
+  userAvatar?: string
+  providerName?: string
+}
+
+export interface HealthcareSearchFilters {
+  searchTerm?: string
+  type?: HealthcareFacilityType
+  specialization?: ProviderSpecialization
+  minRating?: number
+  isVerified?: boolean
+  acceptsNewPatients?: boolean
+  latitude?: number
+  longitude?: number
+  radiusKm?: number
+  page?: number
+  pageSize?: number
 }
 
 // ===== CHAT SYSTEM =====

@@ -23,11 +23,16 @@ builder.Services.AddDbContext<CareNestDbContext>(options =>
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
+builder.Services.AddScoped<IHealthcareFacilityRepository, HealthcareFacilityRepository>();
+builder.Services.AddScoped<IHealthcareProviderRepository, HealthcareProviderRepository>();
+builder.Services.AddScoped<IFacilityReviewRepository, FacilityReviewRepository>();
+builder.Services.AddScoped<IProviderReviewRepository, ProviderReviewRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, JwtAuthService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IReminderService, ReminderDomainService>();
+builder.Services.AddScoped<IHealthcareService, HealthcareService>();
 builder.Services.AddScoped<IReminderApplicationService, ReminderApplicationService>();
 
 // JWT Authentication

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { DashboardLayout } from '@/components/ui/Layout/DashboardLayout';
 import { PlusIcon, BellIcon } from '@/components/ui/Icons';
 import { ReminderList } from '@/components/reminder/ReminderList';
 import { ReminderStatsCard } from '@/components/reminder/ReminderStatsCard';
@@ -102,31 +103,27 @@ function RemindersPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
-              <BellIcon className="h-8 w-8 text-primary-600" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Nhắc nhở</h1>
-                <p className="text-sm text-gray-600">Quản lý các nhắc nhở sức khỏe của bạn</p>
-              </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <BellIcon className="h-8 w-8 text-primary-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Nhắc nhở</h1>
+              <p className="text-sm text-gray-600">Quản lý các nhắc nhở sức khỏe của bạn</p>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Tạo nhắc nhở
-            </button>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Tạo nhắc nhở
+          </button>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Stats Sidebar */}
           <div className="lg:col-span-1">
@@ -206,7 +203,7 @@ function RemindersPageContent() {
           </div>
         </div>
       </Modal>
-    </div>
+    </DashboardLayout>
   );
 }
 
