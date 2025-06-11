@@ -28,12 +28,20 @@ builder.Services.AddScoped<IHealthcareProviderRepository, HealthcareProviderRepo
 builder.Services.AddScoped<IFacilityReviewRepository, FacilityReviewRepository>();
 builder.Services.AddScoped<IProviderReviewRepository, ProviderReviewRepository>();
 
+// Family repositories
+builder.Services.AddScoped<IFamilyRepository, FamilyRepository>();
+builder.Services.AddScoped<IFamilyMemberRepository, FamilyMemberRepository>();
+builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
+
 // Services
 builder.Services.AddScoped<IAuthService, JwtAuthService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IReminderService, ReminderDomainService>();
 builder.Services.AddScoped<IHealthcareService, HealthcareService>();
 builder.Services.AddScoped<IReminderApplicationService, ReminderApplicationService>();
+
+// Family services
+builder.Services.AddScoped<IFamilyService, FamilyService>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

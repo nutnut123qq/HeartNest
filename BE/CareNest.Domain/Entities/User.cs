@@ -22,5 +22,10 @@ public class User : BaseEntity
     public ICollection<Reminder> CreatedReminders { get; set; } = new List<Reminder>();
     public ICollection<Reminder> AssignedReminders { get; set; } = new List<Reminder>();
 
+    // Family navigation properties
+    public ICollection<Family> CreatedFamilies { get; set; } = new List<Family>();
+    public ICollection<FamilyMember> FamilyMemberships { get; set; } = new List<FamilyMember>();
+    public ICollection<Invitation> SentInvitations { get; set; } = new List<Invitation>();
+
     public string FullName => $"{FirstName} {LastName}".Trim();
 }

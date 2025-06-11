@@ -90,6 +90,97 @@ namespace CareNest.Infrastructure.Migrations
                     b.ToTable("FacilityReviews");
                 });
 
+            modelBuilder.Entity("CareNest.Domain.Entities.Family", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("Families");
+                });
+
+            modelBuilder.Entity("CareNest.Domain.Entities.FamilyMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nickname")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("FamilyId", "UserId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("FamilyMembers");
+                });
+
             modelBuilder.Entity("CareNest.Domain.Entities.HealthcareFacility", b =>
                 {
                     b.Property<Guid>("Id")
@@ -310,6 +401,72 @@ namespace CareNest.Infrastructure.Migrations
                     b.HasIndex("Specialization");
 
                     b.ToTable("HealthcareProviders");
+                });
+
+            modelBuilder.Entity("CareNest.Domain.Entities.Invitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeclinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InvitedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("InvitedBy");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Invitations");
                 });
 
             modelBuilder.Entity("CareNest.Domain.Entities.ProviderFacility", b =>
@@ -659,6 +816,36 @@ namespace CareNest.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CareNest.Domain.Entities.Family", b =>
+                {
+                    b.HasOne("CareNest.Domain.Entities.User", "Creator")
+                        .WithMany("CreatedFamilies")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("CareNest.Domain.Entities.FamilyMember", b =>
+                {
+                    b.HasOne("CareNest.Domain.Entities.Family", "Family")
+                        .WithMany("Members")
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CareNest.Domain.Entities.User", "User")
+                        .WithMany("FamilyMemberships")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Family");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CareNest.Domain.Entities.HealthcareProvider", b =>
                 {
                     b.HasOne("CareNest.Domain.Entities.HealthcareFacility", "PrimaryFacility")
@@ -667,6 +854,25 @@ namespace CareNest.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("PrimaryFacility");
+                });
+
+            modelBuilder.Entity("CareNest.Domain.Entities.Invitation", b =>
+                {
+                    b.HasOne("CareNest.Domain.Entities.Family", "Family")
+                        .WithMany("Invitations")
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CareNest.Domain.Entities.User", "InvitedByUser")
+                        .WithMany("SentInvitations")
+                        .HasForeignKey("InvitedBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Family");
+
+                    b.Navigation("InvitedByUser");
                 });
 
             modelBuilder.Entity("CareNest.Domain.Entities.ProviderFacility", b =>
@@ -725,6 +931,13 @@ namespace CareNest.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CareNest.Domain.Entities.Family", b =>
+                {
+                    b.Navigation("Invitations");
+
+                    b.Navigation("Members");
+                });
+
             modelBuilder.Entity("CareNest.Domain.Entities.HealthcareFacility", b =>
                 {
                     b.Navigation("Providers");
@@ -743,7 +956,13 @@ namespace CareNest.Infrastructure.Migrations
                 {
                     b.Navigation("AssignedReminders");
 
+                    b.Navigation("CreatedFamilies");
+
                     b.Navigation("CreatedReminders");
+
+                    b.Navigation("FamilyMemberships");
+
+                    b.Navigation("SentInvitations");
                 });
 #pragma warning restore 612, 618
         }

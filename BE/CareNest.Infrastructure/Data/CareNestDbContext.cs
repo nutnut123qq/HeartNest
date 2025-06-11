@@ -13,6 +13,11 @@ public class CareNestDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
 
+    // Family entities
+    public DbSet<Family> Families { get; set; }
+    public DbSet<FamilyMember> FamilyMembers { get; set; }
+    public DbSet<Invitation> Invitations { get; set; }
+
     // Healthcare entities
     public DbSet<HealthcareFacility> HealthcareFacilities { get; set; }
     public DbSet<HealthcareProvider> HealthcareProviders { get; set; }
@@ -96,6 +101,22 @@ public class CareNestDbContext : DbContext
                 .WithOne(r => r.AssignedToUser)
                 .HasForeignKey(r => r.AssignedToUserId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Family relationships
+            entity.HasMany(u => u.CreatedFamilies)
+                .WithOne(f => f.Creator)
+                .HasForeignKey(f => f.CreatedBy)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasMany(u => u.FamilyMemberships)
+                .WithOne(m => m.User)
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(u => u.SentInvitations)
+                .WithOne(i => i.InvitedByUser)
+                .HasForeignKey(i => i.InvitedBy)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         // Configure Reminder entity
@@ -180,6 +201,138 @@ public class CareNestDbContext : DbContext
 
             // Global query filter to exclude soft deleted records
             entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        // Configure Family entity
+        modelBuilder.Entity<Family>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.IsActive)
+                .IsRequired()
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired();
+
+            entity.Property(e => e.UpdatedAt);
+
+            entity.Property(e => e.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            // Global query filter to exclude soft deleted records
+            entity.HasQueryFilter(e => !e.IsDeleted);
+
+            // Relationships
+            entity.HasMany(f => f.Members)
+                .WithOne(m => m.Family)
+                .HasForeignKey(m => m.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(f => f.Invitations)
+                .WithOne(i => i.Family)
+                .HasForeignKey(i => i.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure FamilyMember entity
+        modelBuilder.Entity<FamilyMember>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.Role)
+                .IsRequired()
+                .HasConversion<string>();
+
+            entity.Property(e => e.JoinedAt)
+                .IsRequired();
+
+            entity.Property(e => e.IsActive)
+                .IsRequired()
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.Nickname)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired();
+
+            entity.Property(e => e.UpdatedAt);
+
+            entity.Property(e => e.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            // Global query filter to exclude soft deleted records
+            entity.HasQueryFilter(e => !e.IsDeleted);
+
+            // Unique constraint: one user per family
+            entity.HasIndex(e => new { e.FamilyId, e.UserId })
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
+        });
+
+        // Configure Invitation entity
+        modelBuilder.Entity<Invitation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.Email)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(e => e.Role)
+                .IsRequired()
+                .HasConversion<string>();
+
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasDefaultValue(Domain.Enums.InvitationStatus.Pending);
+
+            entity.Property(e => e.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(e => e.AcceptedAt);
+
+            entity.Property(e => e.DeclinedAt);
+
+            entity.Property(e => e.Message)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired();
+
+            entity.Property(e => e.UpdatedAt);
+
+            entity.Property(e => e.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            // Global query filter to exclude soft deleted records
+            entity.HasQueryFilter(e => !e.IsDeleted);
+
+            // Indexes
+            entity.HasIndex(e => e.Email);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.ExpiresAt);
         });
 
         // Configure HealthcareFacility entity
@@ -472,6 +625,36 @@ public class CareNestDbContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<Reminder>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    break;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<Family>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    break;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<FamilyMember>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    break;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<Invitation>())
         {
             switch (entry.State)
             {
