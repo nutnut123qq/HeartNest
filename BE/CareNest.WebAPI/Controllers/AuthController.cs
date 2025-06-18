@@ -23,24 +23,38 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            var errors = ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            
-            return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors });
-        }
+            Console.WriteLine($"Login request received: {request?.Email}");
 
-        var result = await _authService.LoginAsync(request);
-        
-        if (result.Success)
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                Console.WriteLine($"ModelState invalid: {string.Join(", ", errors)}");
+                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors });
+            }
+
+            Console.WriteLine("Calling AuthService.LoginAsync...");
+            var result = await _authService.LoginAsync(request);
+            Console.WriteLine($"AuthService result: Success={result.Success}, Message={result.Message}");
+
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+        catch (Exception ex)
         {
-            return Ok(result);
+            Console.WriteLine($"Login exception: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            return BadRequest(new { success = false, message = "Có lỗi xảy ra trong quá trình đăng nhập", error = ex.Message });
         }
-
-        return BadRequest(result);
     }
 
     /// <summary>

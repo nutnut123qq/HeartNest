@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using CareNest.Application.Interfaces;
 using CareNest.Application.Services;
@@ -16,6 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Database
 builder.Services.AddDbContext<CareNestDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -33,6 +37,10 @@ builder.Services.AddScoped<IFamilyRepository, FamilyRepository>();
 builder.Services.AddScoped<IFamilyMemberRepository, FamilyMemberRepository>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 
+// Chat repositories
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+
 // Services
 builder.Services.AddScoped<IAuthService, JwtAuthService>();
 builder.Services.AddScoped<AuthService>();
@@ -43,8 +51,14 @@ builder.Services.AddScoped<IReminderApplicationService, ReminderApplicationServi
 // Family services
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 
+// Chat services
+builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IChatApplicationService, ChatApplicationService>();
+
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+Console.WriteLine($"JwtSettings section exists: {jwtSettings.Exists()}");
+Console.WriteLine($"SecretKey value: {jwtSettings["SecretKey"]}");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
 
 builder.Services.AddAuthentication(options =>
@@ -63,7 +77,40 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role
+    };
+
+    // Configure JWT for SignalR
+    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("JWT Token validated successfully");
+            Console.WriteLine($"Claims count: {context.Principal?.Claims.Count()}");
+            foreach (var claim in context.Principal?.Claims ?? Enumerable.Empty<Claim>())
+            {
+                Console.WriteLine($"  Claim: {claim.Type} = {claim.Value}");
+            }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -72,9 +119,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials(); // Required for SignalR
     });
 });
 
@@ -82,9 +130,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "CareNest API", 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "CareNest API",
         Version = "v1",
         Description = "API cho ứng dụng chăm sóc sức khỏe gia đình CareNest"
     });
@@ -133,6 +181,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// SignalR Hub
+app.MapHub<CareNest.WebAPI.Hubs.ChatHub>("/chatHub");
 
 // Ensure database is created
 using (var scope = app.Services.CreateScope())
