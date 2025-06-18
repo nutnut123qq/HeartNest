@@ -372,12 +372,24 @@ export interface Message {
   id: string
   conversationId: string
   senderId: string
-  sender: User
+  sender?: User  // Optional for backward compatibility
+  senderName?: string  // From backend MessageDto
+  senderAvatar?: string  // From backend MessageDto
   content: string
   type: 'text' | 'image' | 'file' | 'voice' | 'system'
   metadata?: MessageMetadata
   isRead: boolean
   createdAt: string
+  // Additional fields from backend
+  fileName?: string
+  fileUrl?: string
+  fileType?: string
+  fileSize?: number
+  durationSeconds?: number
+  readAt?: string
+  replyToMessage?: Message
+  isEdited?: boolean
+  readReceipts?: any[]
 }
 
 export interface MessageMetadata {

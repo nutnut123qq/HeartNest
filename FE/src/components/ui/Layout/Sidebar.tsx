@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
+import { useUnreadCount } from '@/store/chatStore'
 import { UserRole } from '@/types'
 
 interface SidebarProps {
@@ -135,18 +136,20 @@ const settingsItems = [
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, className }) => {
   const pathname = usePathname()
   const { user } = useAuthStore()
+  const unreadCount = useUnreadCount()
 
   const navigationItems = getNavigationItems(user?.role || UserRole.User)
 
   const NavItem = ({ item }: { item: typeof navigationItems[0] }) => {
     const isActive = pathname === item.href || (pathname?.startsWith(item.href + '/') ?? false)
-    
+    const showUnreadBadge = item.href === '/chat' && unreadCount > 0
+
     return (
       <Link
         href={item.href}
         onClick={onClose}
         className={cn(
-          'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+          'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative',
           isActive
             ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-600'
             : 'text-secondary-600 hover:bg-secondary-100 hover:text-secondary-900'
@@ -157,7 +160,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, className }) 
           isActive ? 'text-primary-600' : 'text-secondary-500'
         )} />
         <div className="flex-1">
-          <div>{item.name}</div>
+          <div className="flex items-center justify-between">
+            <span>{item.name}</span>
+            {showUnreadBadge && (
+              <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-red-500 rounded-full">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </div>
           <div className="text-xs text-secondary-500 mt-0.5">
             {item.description}
           </div>

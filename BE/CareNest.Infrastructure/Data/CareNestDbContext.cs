@@ -25,6 +25,10 @@ public class CareNestDbContext : DbContext
     public DbSet<FacilityReview> FacilityReviews { get; set; }
     public DbSet<ProviderReview> ProviderReviews { get; set; }
 
+    // Chat entities
+    public DbSet<Conversation> Conversations { get; set; }
+    public DbSet<Message> Messages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -609,6 +613,43 @@ public class CareNestDbContext : DbContext
             entity.HasIndex(e => e.ProviderId);
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.Rating);
+        });
+
+        // Configure Chat entities
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Relationships
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.HealthcareProvider)
+                .WithMany()
+                .HasForeignKey(e => e.HealthcareProviderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Messages)
+                .WithOne(m => m.Conversation)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint to prevent duplicate conversations
+            entity.HasIndex(e => new { e.UserId, e.HealthcareProviderId })
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Relationships
+            entity.HasOne(e => e.Sender)
+                .WithMany()
+                .HasForeignKey(e => e.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

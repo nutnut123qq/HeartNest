@@ -16,7 +16,7 @@ import Link from 'next/link'
 
 export default function FacilityDetailPage() {
   const params = useParams()
-  const facilityId = params.id as string
+  const facilityId = params?.id as string
   
   const [facility, setFacility] = useState<HealthcareFacility | null>(null)
   const [reviews, setReviews] = useState<FacilityReview[]>([])

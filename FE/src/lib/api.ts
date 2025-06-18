@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 // Create axios instance
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
-  timeout: 10000,
+  timeout: 120000, // 120 seconds - increased for slow database
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,11 +15,14 @@ api.interceptors.request.use(
   (config) => {
     // Get token from auth store
     const token = useAuthStore.getState().accessToken
-    
+    const authState = useAuthStore.getState()
+
+
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
+
     return config
   },
   (error) => {
@@ -34,46 +37,46 @@ api.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as any
-    
+
     // If error is 401 and we haven't already tried to refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      
+
       const authStore = useAuthStore.getState()
       const refreshToken = authStore.refreshToken
-      
+
       if (refreshToken) {
         try {
           // Try to refresh the token
           const newAccessToken = await authStore.refreshAccessToken()
-          
+
           // Update the original request with new token
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
-          
+
           // Retry the original request
           return api(originalRequest)
         } catch (refreshError) {
           // Refresh failed, logout user
           authStore.logout()
-          
+
           // Redirect to login page
           if (typeof window !== 'undefined') {
             window.location.href = '/login'
           }
-          
+
           return Promise.reject(refreshError)
         }
       } else {
         // No refresh token, logout user
         authStore.logout()
-        
+
         // Redirect to login page
         if (typeof window !== 'undefined') {
           window.location.href = '/login'
         }
       }
     }
-    
+
     return Promise.reject(error)
   }
 )

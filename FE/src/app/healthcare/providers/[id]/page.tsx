@@ -11,12 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { HealthcareProvider, ProviderReview } from '@/types'
 import { healthcareApiService } from '@/services/healthcareApi'
+import { StartConsultationButton } from '@/components/chat/StartConsultationButton'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
 export default function ProviderDetailPage() {
   const params = useParams()
-  const providerId = params.id as string
+  const providerId = params?.id as string
   
   const [provider, setProvider] = useState<HealthcareProvider | null>(null)
   const [reviews, setReviews] = useState<ProviderReview[]>([])
@@ -179,7 +180,7 @@ export default function ProviderDetailPage() {
             </div>
           </div>
           
-          <div className="mt-4 md:mt-0 md:ml-6">
+          <div className="mt-4 md:mt-0 md:ml-6 space-y-4">
             <Card className="w-full md:w-64">
               <CardContent className="p-4">
                 <div className="text-center">
@@ -195,6 +196,19 @@ export default function ProviderDetailPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Consultation Button */}
+            {provider.acceptsNewPatients && (
+              <div className="w-full md:w-64">
+                <StartConsultationButton
+                  providerId={provider.id}
+                  providerName={provider.fullName}
+                  consultationFee={provider.consultationFees?.['Tư vấn trực tuyến'] || provider.consultationFees?.['Khám tổng quát']}
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

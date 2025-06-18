@@ -3,6 +3,7 @@ namespace CareNest.Application.Common;
 public class ApiResponse<T>
 {
     public bool Success { get; set; }
+    public bool IsSuccess => Success;
     public string Message { get; set; } = string.Empty;
     public T? Data { get; set; }
     public List<string> Errors { get; set; } = new();
