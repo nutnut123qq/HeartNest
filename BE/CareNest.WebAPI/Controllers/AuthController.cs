@@ -25,8 +25,6 @@ public class AuthController : ControllerBase
     {
         try
         {
-            Console.WriteLine($"Login request received: {request?.Email}");
-
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values
@@ -34,13 +32,10 @@ public class AuthController : ControllerBase
                     .Select(e => e.ErrorMessage)
                     .ToList();
 
-                Console.WriteLine($"ModelState invalid: {string.Join(", ", errors)}");
                 return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors });
             }
 
-            Console.WriteLine("Calling AuthService.LoginAsync...");
             var result = await _authService.LoginAsync(request);
-            Console.WriteLine($"AuthService result: Success={result.Success}, Message={result.Message}");
 
             if (result.Success)
             {
@@ -51,8 +46,6 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Login exception: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return BadRequest(new { success = false, message = "Có lỗi xảy ra trong quá trình đăng nhập", error = ex.Message });
         }
     }
@@ -71,12 +64,12 @@ public class AuthController : ControllerBase
                 .SelectMany(v => v.Errors)
                 .Select(e => e.ErrorMessage)
                 .ToList();
-            
+
             return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors });
         }
 
         var result = await _authService.RegisterAsync(request);
-        
+
         if (result.Success)
         {
             return Ok(result);

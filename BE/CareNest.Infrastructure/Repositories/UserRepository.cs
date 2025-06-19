@@ -61,6 +61,13 @@ public class UserRepository : IUserRepository
         return await _context.Users.ToListAsync();
     }
 
+    public async Task<IEnumerable<User>> GetAllActiveAsync()
+    {
+        return await _context.Users
+            .Where(u => u.IsActive && !u.IsDeleted)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role)
     {
         return await _context.Users

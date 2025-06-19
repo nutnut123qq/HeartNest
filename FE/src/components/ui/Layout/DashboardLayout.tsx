@@ -5,6 +5,7 @@ import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 import { Container } from './Container'
 import { cn } from '@/lib/utils'
+import { useRequireAuth } from '@/hooks/useAuthGuard'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -20,6 +21,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   showContainer = true,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Remove auth guard from layout - let individual pages handle it
+  // This prevents double auth checks and improves performance
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen)

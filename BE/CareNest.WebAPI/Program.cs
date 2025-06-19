@@ -1,12 +1,15 @@
 using System.Security.Claims;
 using System.Text;
 using CareNest.Application.Interfaces;
+using CareNest.Application.Jobs;
 using CareNest.Application.Services;
 using CareNest.Domain.Interfaces;
 using CareNest.Domain.Services;
 using CareNest.Infrastructure.Data;
 using CareNest.Infrastructure.Repositories;
 using CareNest.Infrastructure.Services;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +26,15 @@ builder.Services.AddSignalR();
 // Database
 builder.Services.AddDbContext<CareNestDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Hangfire
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHangfireServer();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -54,6 +66,15 @@ builder.Services.AddScoped<IFamilyService, FamilyService>();
 // Chat services
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IChatApplicationService, ChatApplicationService>();
+
+// Notification services
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<ISignalRNotificationSender, CareNest.WebAPI.Services.SignalRNotificationSender>();
+
+// Background job services
+builder.Services.AddScoped<IBackgroundJobService, HangfireJobService>();
+builder.Services.AddScoped<ReminderNotificationJob>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -177,6 +198,9 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
+// Hangfire Dashboard
+app.UseHangfireDashboard("/hangfire");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -191,5 +215,16 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<CareNestDbContext>();
     context.Database.EnsureCreated();
 }
+
+// Setup recurring jobs
+RecurringJob.AddOrUpdate<ReminderNotificationJob>(
+    "check-reminders",
+    job => job.CheckAndSendRemindersAsync(),
+    "*/1 * * * *"); // Every minute
+
+RecurringJob.AddOrUpdate<ReminderNotificationJob>(
+    "check-overdue-reminders",
+    job => job.CheckOverdueRemindersAsync(),
+    "0 */6 * * *"); // Every 6 hours
 
 app.Run();

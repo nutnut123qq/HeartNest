@@ -15,8 +15,7 @@ namespace CareNest.WebAPI.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IChatApplicationService _chatApplicationService;
-    private readonly CareNestDbContext _context;
-    private static User? _cachedTestUser = null; // Cache test user to avoid repeated queries
+    private readonly CareNestDbContext _context; // Cache test user to avoid repeated queries
 
     public ChatController(IChatApplicationService chatApplicationService, CareNestDbContext context)
     {
@@ -24,18 +23,7 @@ public class ChatController : ControllerBase
         _context = context;
     }
 
-    private async Task<User?> GetTestUserAsync()
-    {
-        if (_cachedTestUser != null)
-            return _cachedTestUser;
 
-        var testEmail = new Domain.ValueObjects.Email("test@carenest.com");
-        _cachedTestUser = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == testEmail);
-
-        return _cachedTestUser;
-    }
 
     private async Task<User?> GetCurrentUserAsync()
     {
@@ -149,84 +137,7 @@ public class ChatController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Test endpoint đơn giản
-    /// </summary>
-    [HttpGet("test")]
-    [AllowAnonymous]
-    public IActionResult Test()
-    {
-        return Ok(new {
-            message = "Chat API is working",
-            timestamp = DateTime.UtcNow
-        });
-    }
 
-    /// <summary>
-    /// Test message endpoint để debug
-    /// </summary>
-    [HttpPost("test-message")]
-    [AllowAnonymous]
-    public IActionResult TestMessage()
-    {
-        try
-        {
-            Console.WriteLine($"TestMessage called!");
-            return Ok(new {
-                message = "Test message endpoint works",
-                timestamp = DateTime.UtcNow
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"TestMessage error: {ex.Message}");
-            return BadRequest($"Error: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Test message với string content
-    /// </summary>
-    [HttpPost("test-simple")]
-    [AllowAnonymous]
-    public IActionResult TestSimple([FromBody] string content)
-    {
-        try
-        {
-            Console.WriteLine($"TestSimple called with content: {content}");
-            return Ok(new {
-                message = "Test simple received",
-                content = content,
-                timestamp = DateTime.UtcNow
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"TestSimple error: {ex.Message}");
-            return BadRequest($"Error: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Test endpoint để debug conversation creation
-    /// </summary>
-    [HttpPost("test-conversation")]
-    [AllowAnonymous]
-    public async Task<IActionResult> TestCreateConversation([FromBody] CreateConversationDto dto)
-    {
-        try
-        {
-            return Ok(new {
-                message = "Received request successfully",
-                healthcareProviderId = dto.HealthcareProviderId,
-                timestamp = DateTime.UtcNow
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest($"Error: {ex.Message}");
-        }
-    }
 
     /// <summary>
     /// Create or get existing conversation with a healthcare provider

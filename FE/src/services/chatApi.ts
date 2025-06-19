@@ -98,6 +98,9 @@ class ChatApiService {
 
       const response = await api.get(`/api/chat/conversations/${conversationId}/messages?${params}`)
       return response.data
+    } catch (error) {
+      throw error
+    }
   }
 
   async sendMessage(request: CreateMessageRequest): Promise<ApiResponse<Message>> {

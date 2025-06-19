@@ -25,6 +25,17 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     // Don't redirect while loading
     if (isLoading) return
 
+    // Check token validity if authenticated
+    if (isAuthenticated) {
+      const { isTokenValid, checkTokenExpiry } = useAuthStore.getState()
+      if (!isTokenValid()) {
+        console.log('Token expired in auth guard, clearing auth')
+        checkTokenExpiry()
+        router.push(redirectTo)
+        return
+      }
+    }
+
     // Check if authentication is required
     if (requireAuth && !isAuthenticated) {
       router.push(redirectTo)
@@ -49,6 +60,9 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
       }
       return
     }
+
+    // Remove periodic token check from individual hooks
+    // This will be handled globally in the auth store or layout
   }, [isAuthenticated, isLoading, user, requiredRole, requireAuth, router, redirectTo])
 
   return {

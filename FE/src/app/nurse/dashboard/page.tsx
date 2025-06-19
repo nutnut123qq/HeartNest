@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { UserRole } from '@/types'
 import { api } from '@/lib/api'
+import { useCache } from '@/hooks/useCache'
 import { Users, Activity, Bell, CheckCircle, Clock, Calendar } from 'lucide-react'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useRouter } from 'next/navigation'
@@ -18,8 +19,15 @@ interface NurseStats {
 export default function NurseDashboard() {
   const { user, isNurse } = useAuthStore()
   const router = useRouter()
-  const [stats, setStats] = useState<NurseStats | null>(null)
-  const [loading, setLoading] = useState(true)
+
+  // Use cached data for better performance
+  const { data: stats, loading, error, refresh } = useCache(
+    async () => {
+      const response = await api.get('/api/nurse/dashboard/stats')
+      return response.data.data
+    },
+    { key: 'nurse-dashboard-stats', ttl: 2 * 60 * 1000 } // 2 minutes cache
+  )
 
   useEffect(() => {
     if (!user) {
@@ -31,21 +39,7 @@ export default function NurseDashboard() {
       router.push('/dashboard')
       return
     }
-
-    fetchStats()
   }, [user, isNurse, router])
-
-  const fetchStats = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get('/api/nurse/dashboard/stats')
-      setStats(response.data.data)
-    } catch (error) {
-      console.error('Error fetching nurse stats:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -128,7 +122,7 @@ export default function NurseDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={() => router.push('/nurse/reminders')}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
               >
@@ -140,8 +134,8 @@ export default function NurseDashboard() {
                   </div>
                 </div>
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => router.push('/nurse/patients')}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
               >
@@ -168,17 +162,17 @@ export default function NurseDashboard() {
                 <span className="font-semibold text-orange-600">{stats.pendingReminders}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-green-500 h-2 rounded-full" 
-                  style={{ 
-                    width: stats.totalAssignedReminders > 0 
-                      ? `${(stats.completedReminders / stats.totalAssignedReminders) * 100}%` 
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{
+                    width: stats.totalAssignedReminders > 0
+                      ? `${(stats.completedReminders / stats.totalAssignedReminders) * 100}%`
                       : '0%'
                   }}
                 ></div>
               </div>
               <p className="text-xs text-gray-500">
-                {stats.totalAssignedReminders > 0 
+                {stats.totalAssignedReminders > 0
                   ? ((stats.completedReminders / stats.totalAssignedReminders) * 100).toFixed(1)
                   : 0}% công việc đã hoàn thành
               </p>

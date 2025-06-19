@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Menu, X, Bell, User, LogOut, Settings, Heart } from 'lucide-react'
+import { Menu, X, Bell, User, LogOut, Settings, Heart, Check, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
+import { useNotifications } from '@/hooks/useNotifications'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const { user, logout } = useAuthStore()
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -47,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
         >
           <Menu className="h-6 w-6" />
         </Button>
-        
+
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 bg-primary-600 rounded-lg">
             <Heart className="h-5 w-5 text-white" />
@@ -70,55 +72,99 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
           >
             <Bell className="h-5 w-5" />
             {/* Notification badge */}
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-error-500 text-white text-xs rounded-full flex items-center justify-center">
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-error-500 text-white text-xs rounded-full flex items-center justify-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </Button>
 
           {/* Notifications dropdown */}
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-secondary-200 z-50">
-              <div className="p-4 border-b border-secondary-200">
+              <div className="p-4 border-b border-secondary-200 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Thông báo</h3>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={markAllAsRead}
+                    className="text-xs"
+                  >
+                    Đánh dấu tất cả đã đọc
+                  </Button>
+                )}
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {/* Sample notifications */}
-                <div className="p-4 border-b border-secondary-100 hover:bg-secondary-50">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-primary-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Nhắc nhở uống thuốc</p>
-                      <p className="text-xs text-secondary-600">Đã đến giờ uống thuốc huyết áp</p>
-                      <p className="text-xs text-secondary-500 mt-1">5 phút trước</p>
-                    </div>
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center text-secondary-500">
+                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Không có thông báo nào</p>
                   </div>
-                </div>
-                <div className="p-4 border-b border-secondary-100 hover:bg-secondary-50">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-warning-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Lịch khám sắp tới</p>
-                      <p className="text-xs text-secondary-600">Khám tim mạch vào ngày mai lúc 9:00</p>
-                      <p className="text-xs text-secondary-500 mt-1">1 giờ trước</p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={cn(
+                        "p-4 border-b border-secondary-100 hover:bg-secondary-50 cursor-pointer",
+                        !notification.isRead && "bg-primary-50"
+                      )}
+                      onClick={() => !notification.isRead && markAsRead(notification.id)}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full mt-2",
+                          !notification.isRead ? "bg-primary-500" : "bg-secondary-300"
+                        )}></div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{notification.title}</p>
+                          <p className="text-xs text-secondary-600 line-clamp-2">{notification.message}</p>
+                          <p className="text-xs text-secondary-500 mt-1">{notification.timeAgo}</p>
+
+                          {/* Quick actions for reminder notifications */}
+                          {notification.type === 'reminder' && notification.data && !notification.isRead && (
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-6 px-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Complete reminder logic here
+                                  markAsRead(notification.id);
+                                }}
+                              >
+                                <Check className="h-3 w-3 mr-1" />
+                                Đã uống
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-6 px-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Snooze reminder logic here
+                                  markAsRead(notification.id);
+                                }}
+                              >
+                                <Clock className="h-3 w-3 mr-1" />
+                                Hoãn 15p
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="p-4 border-b border-secondary-100 hover:bg-secondary-50">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-success-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Thành viên mới</p>
-                      <p className="text-xs text-secondary-600">Mẹ đã tham gia gia đình CareNest</p>
-                      <p className="text-xs text-secondary-500 mt-1">2 giờ trước</p>
-                    </div>
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
-              <div className="p-4 border-t border-secondary-200">
-                <Button variant="ghost" className="w-full text-sm">
-                  Xem tất cả thông báo
-                </Button>
-              </div>
+              {notifications.length > 0 && (
+                <div className="p-4 border-t border-secondary-200">
+                  <Button variant="ghost" className="w-full text-sm">
+                    Xem tất cả thông báo
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -153,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
                 <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
                 <p className="text-xs text-secondary-600">{user?.email}</p>
               </div>
-              
+
               <div className="py-2">
                 <button
                   onClick={() => setShowUserMenu(false)}
@@ -162,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
                   <User className="h-4 w-4" />
                   <span>Thông tin cá nhân</span>
                 </button>
-                
+
                 <button
                   onClick={() => setShowUserMenu(false)}
                   className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50"
@@ -171,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, className }) => {
                   <span>Cài đặt</span>
                 </button>
               </div>
-              
+
               <div className="border-t border-secondary-200 py-2">
                 <button
                   onClick={handleLogout}

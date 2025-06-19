@@ -3,7 +3,7 @@ import { Message, Conversation } from '@/types'
 import { useChatStore } from '@/store/chatStore'
 
 class SignalRService {
-  private connection: HubConnection | null = null
+  public connection: HubConnection | null = null
   private isConnected = false
 
   async connect(token: string): Promise<void> {
@@ -90,6 +90,13 @@ class SignalRService {
       useChatStore.getState().updateConversation(conversationId, {
         // consultationStatus: status as any // Temporarily disabled due to type issues
       })
+    })
+
+    // Handle notifications
+    this.connection.on('ReceiveNotification', (notification: any) => {
+      console.log('🔔 Received notification via SignalR:', notification)
+      // Dispatch custom event for notification system
+      window.dispatchEvent(new CustomEvent('signalr-notification', { detail: notification }))
     })
 
     // Connection events

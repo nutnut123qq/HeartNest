@@ -13,6 +13,7 @@ public interface IUserRepository
     Task<User> UpdateAsync(User user);
     Task DeleteAsync(Guid id);
     Task<IEnumerable<User>> GetAllAsync();
+    Task<IEnumerable<User>> GetAllActiveAsync();
 
     // Role-based methods
     Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role);

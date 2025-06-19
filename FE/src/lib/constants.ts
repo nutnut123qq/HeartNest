@@ -12,7 +12,7 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: '/api/auth/reset-password',
     ME: '/api/auth/me',
   },
-  
+
   // Family Management
   FAMILY: {
     BASE: '/api/family',
@@ -20,27 +20,27 @@ export const API_ENDPOINTS = {
     MEMBERS: '/api/family/members',
     INVITATIONS: '/api/family/invitations',
   },
-  
+
   // Reminders
   REMINDERS: {
     BASE: '/api/reminders',
     UPCOMING: '/api/reminders/upcoming',
     HISTORY: '/api/reminders/history',
   },
-  
+
   // Healthcare
   HEALTHCARE: {
     FACILITIES: '/api/healthcare/facilities',
     PROVIDERS: '/api/healthcare/providers',
     NEARBY: '/api/healthcare/facilities/nearby',
   },
-  
+
   // Chat
   CHAT: {
     CONVERSATIONS: '/api/chat/conversations',
     MESSAGES: '/api/chat/conversations',
   },
-  
+
   // Subscription
   SUBSCRIPTION: {
     PLANS: '/api/subscription/plans',
@@ -69,7 +69,7 @@ export const SUBSCRIPTION_PLANS = {
     channels: ['web', 'zalo', 'sms'],
     popular: false,
   },
-  
+
   SMALL_FAMILY: {
     id: 'small_family',
     name: 'Gói Gia Đình Nhỏ',
@@ -87,7 +87,7 @@ export const SUBSCRIPTION_PLANS = {
     channels: ['web', 'zalo', 'sms', 'email'],
     popular: false,
   },
-  
+
   LOVE_PACKAGE: {
     id: 'love_package',
     name: 'Gói Yêu Thương',
@@ -106,7 +106,7 @@ export const SUBSCRIPTION_PLANS = {
     channels: ['web', 'zalo', 'sms', 'email', 'push'],
     popular: true,
   },
-  
+
   CUSTOM: {
     id: 'custom',
     name: 'Gói Tùy Chỉnh',
@@ -259,13 +259,13 @@ export const UI_CONSTANTS = {
   MOBILE_BREAKPOINT: 768,
   TABLET_BREAKPOINT: 1024,
   DESKTOP_BREAKPOINT: 1280,
-  
+
   ANIMATION_DURATION: {
     FAST: 150,
     NORMAL: 300,
     SLOW: 500,
   },
-  
+
   TOAST_DURATION: {
     SUCCESS: 3000,
     ERROR: 5000,
@@ -341,27 +341,27 @@ export const ROUTES = {
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
-  
+
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
-  
+
   FAMILY: '/family',
   FAMILY_INVITE: '/family/invite',
   FAMILY_MEMBERS: '/family/members',
-  
+
   REMINDERS: '/reminders',
   REMINDERS_CREATE: '/reminders/create',
-  
+
   HEALTHCARE: '/healthcare',
-  HEALTHCARE_MAP: '/healthcare/map',
+  HEALTHCARE_MAP: '/map',
   HEALTHCARE_PROVIDERS: '/healthcare/providers',
-  
+
   CHAT: '/chat',
-  
+
   SUBSCRIPTION: '/subscription',
   SUBSCRIPTION_UPGRADE: '/subscription/upgrade',
   SUBSCRIPTION_BILLING: '/subscription/billing',
-  
+
   SETTINGS: '/settings',
   SETTINGS_NOTIFICATIONS: '/settings/notifications',
   SETTINGS_PRIVACY: '/settings/privacy',

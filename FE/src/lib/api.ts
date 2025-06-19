@@ -67,12 +67,24 @@ api.interceptors.response.use(
           return Promise.reject(refreshError)
         }
       } else {
-        // No refresh token, logout user
-        authStore.logout()
+        // No refresh token available
+        // Only logout if this is not a login/register request
+        const isAuthRequest = originalRequest.url?.includes('/auth/login') ||
+                             originalRequest.url?.includes('/auth/register')
 
-        // Redirect to login page
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login'
+        if (!isAuthRequest) {
+          console.log('401 error on authenticated request, but no refresh token available')
+          // Don't auto logout - let user manually logout or try login again
+          // authStore.logout()
+
+          // Only redirect to login if user is on a protected page
+          const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+          const isProtectedPage = !['/login', '/register', '/'].includes(currentPath)
+
+          if (isProtectedPage && typeof window !== 'undefined') {
+            console.log('Redirecting to login due to 401 on protected page')
+            window.location.href = '/login'
+          }
         }
       }
     }

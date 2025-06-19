@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
 import { useUnreadCount } from '@/store/chatStore'
+import { useRoutePreload } from '@/hooks/useRoutePreload'
 import { UserRole } from '@/types'
 
 interface SidebarProps {
@@ -65,7 +66,7 @@ const getNavigationItems = (userRole: UserRole) => {
     },
     {
       name: 'Bản đồ y tế',
-      href: '/healthcare/map',
+      href: '/map',
       icon: MapPin,
       description: 'Bản đồ cơ sở y tế gần bạn',
       roles: [UserRole.User]
@@ -138,6 +139,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, className }) 
   const { user } = useAuthStore()
   const unreadCount = useUnreadCount()
 
+  // Preload routes for faster navigation
+  useRoutePreload()
+
   const navigationItems = getNavigationItems(user?.role || UserRole.User)
 
   const NavItem = ({ item }: { item: typeof navigationItems[0] }) => {
@@ -202,7 +206,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, className }) 
             </div>
             <span className="text-xl font-bold text-primary-600">CareNest</span>
           </div>
-          
+
           <Button
             variant="ghost"
             size="icon"

@@ -210,10 +210,10 @@ public class SeedController : ControllerBase
             await _context.HealthcareProviders.AddRangeAsync(providers);
             await _context.SaveChangesAsync();
 
-            return Ok(new { 
-                message = "Đã tạo thành công dữ liệu healthcare providers", 
+            return Ok(new {
+                message = "Đã tạo thành công dữ liệu healthcare providers",
                 facilitiesCount = facilities.Count,
-                providersCount = providers.Count 
+                providersCount = providers.Count
             });
         }
         catch (Exception ex)
@@ -286,79 +286,7 @@ public class SeedController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Tạo user test để chat
-    /// </summary>
-    [HttpPost("test-user")]
-    [AllowAnonymous]
-    public async Task<IActionResult> CreateTestUser()
-    {
-        try
-        {
-            // Kiểm tra xem đã có user test chưa
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email.Value == "test@carenest.com");
-            if (existingUser != null)
-            {
-                return Ok(new {
-                    message = "User test đã tồn tại",
-                    userId = existingUser.Id,
-                    email = existingUser.Email.Value
-                });
-            }
 
-            var testUser = new User
-            {
-                Id = Guid.NewGuid(),
-                FirstName = "Test",
-                LastName = "User",
-                Email = new Domain.ValueObjects.Email("test@carenest.com"),
-                PasswordHash = "test123", // Simplified for testing
-                Role = Domain.Enums.UserRole.User, // Role = 0
-                IsActive = true,
-                IsEmailVerified = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _context.Users.AddAsync(testUser);
-            await _context.SaveChangesAsync();
-
-            return Ok(new {
-                message = "Đã tạo user test thành công",
-                userId = testUser.Id,
-                email = testUser.Email.Value
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest($"Lỗi khi tạo user test: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Test endpoint để kiểm tra dữ liệu providers
-    /// </summary>
-    [HttpGet("test-providers")]
-    [AllowAnonymous]
-    public async Task<IActionResult> TestProviders()
-    {
-        try
-        {
-            var providers = await _context.HealthcareProviders.ToListAsync();
-            var nurseUsers = await _context.Users.Where(u => u.Role == Domain.Enums.UserRole.Nurse).ToListAsync();
-
-            return Ok(new {
-                message = "Dữ liệu providers hiện tại",
-                healthcareProvidersCount = providers.Count,
-                nurseUsersCount = nurseUsers.Count,
-                healthcareProviders = providers.Select(p => new { p.Id, p.FirstName, p.LastName, p.Specialization }),
-                nurseUsers = nurseUsers.Select(u => new { u.Id, u.FirstName, u.LastName, u.Role })
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest($"Lỗi khi kiểm tra dữ liệu: {ex.Message}");
-        }
-    }
 
     /// <summary>
     /// Xóa tất cả dữ liệu healthcare providers (chỉ dùng để test)
@@ -371,13 +299,13 @@ public class SeedController : ControllerBase
         {
             var providers = await _context.HealthcareProviders.ToListAsync();
             var facilities = await _context.HealthcareFacilities.ToListAsync();
-            
+
             _context.HealthcareProviders.RemoveRange(providers);
             _context.HealthcareFacilities.RemoveRange(facilities);
-            
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { 
+            return Ok(new {
                 message = "Đã xóa tất cả dữ liệu healthcare providers",
                 providersRemoved = providers.Count,
                 facilitiesRemoved = facilities.Count

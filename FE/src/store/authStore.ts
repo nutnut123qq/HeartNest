@@ -26,6 +26,10 @@ interface AuthState {
   isNurse: () => boolean
   isUser: () => boolean
   hasRole: (role: UserRole) => boolean
+
+  // Token helpers
+  isTokenValid: () => boolean
+  checkTokenExpiry: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -192,6 +196,32 @@ export const useAuthStore = create<AuthState>()(
       hasRole: (role: UserRole) => {
         const { user } = get()
         return user?.role === role
+      },
+
+      // Token helpers
+      isTokenValid: () => {
+        const { accessToken } = get()
+        if (!accessToken) return false
+
+        try {
+          // Decode JWT token to check expiry
+          const payload = JSON.parse(atob(accessToken.split('.')[1]))
+          const currentTime = Math.floor(Date.now() / 1000)
+
+          // Check if token is expired (with 5 minute buffer)
+          return payload.exp > (currentTime + 300)
+        } catch (error) {
+          console.error('Error checking token validity:', error)
+          return false
+        }
+      },
+
+      checkTokenExpiry: () => {
+        const { isTokenValid, logout } = get()
+        if (!isTokenValid()) {
+          console.log('Token expired, logging out...')
+          logout()
+        }
       },
     }),
     {
